@@ -23,6 +23,32 @@ namespace UnityEditor.ShaderGraph
             drawState = temp;
         }
 
+        public void GetOutputAndInputSlots(out SlotReference outputSlotRef, out List<SlotReference> inputSlotRefs)
+        {
+            outputSlotRef = new SlotReference();
+            inputSlotRefs =  new List<SlotReference>();
+            var inputSlot = FindSlot<MaterialSlot>(kInputSlotID);
+
+            IEnumerable<IEdge> inEdges = owner.GetEdges(inputSlot.slotReference);
+            if (!inEdges.Any())
+            {
+                return;
+            }
+
+            outputSlotRef = inEdges.ToList()[0].outputSlot;
+            var outputSlot = FindSlot<MaterialSlot>(kOutputSlotID);
+            // Get the slot where this edge ends.
+            IEnumerable<IEdge> outEdges = owner.GetEdges(outputSlot.slotReference);
+            if (!outEdges.Any())
+            {
+                return;
+            }
+            foreach (var edge in outEdges)
+            {
+                inputSlotRefs.Add(edge.inputSlot);
+            }
+        }
+
         public override void ValidateNode()
         {
             base.ValidateNode();
